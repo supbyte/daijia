@@ -1,6 +1,8 @@
 package com.atguigu.daijia.driver.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.atguigu.daijia.common.execption.GuiguException;
+import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.driver.config.TencentCloudProperties;
 import com.atguigu.daijia.driver.service.CosService;
 import com.atguigu.daijia.model.vo.driver.CosUploadVo;
@@ -15,6 +17,7 @@ import com.qcloud.cos.region.Region;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -35,7 +38,6 @@ public class CosServiceImpl implements CosService {
     @Resource
     private TencentCloudProperties tencentCloudProperties;
 
-    @SneakyThrows
     @Override
     public CosUploadVo upload(MultipartFile file, String path) {
         COSClient cosClient = this.getCosClient();
@@ -49,18 +51,24 @@ public class CosServiceImpl implements CosService {
         //向存储桶中保存文件
         String fileType = Objects.requireNonNull(file.getOriginalFilename()).substring(file.getOriginalFilename().lastIndexOf(".")); //文件后缀名
         String uploadPath = "/driver/" + path + "/" + UUID.randomUUID().toString().replaceAll("-", "") + fileType;
-        PutObjectRequest putObjectRequest = new PutObjectRequest(tencentCloudProperties.getBucketPrivate(), uploadPath, file.getInputStream(), meta);
-        putObjectRequest.setStorageClass(StorageClass.Standard);
-        PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest); //上传文件
-        log.info(JSON.toJSONString(putObjectResult));
-        cosClient.shutdown();
+        PutObjectRequest putObjectRequest = null;
+        try {
+            putObjectRequest = new PutObjectRequest(tencentCloudProperties.getBucketPrivate(), uploadPath, file.getInputStream(), meta);
+            putObjectRequest.setStorageClass(StorageClass.Standard);
+            PutObjectResult putObjectResult = cosClient.putObject(putObjectRequest); //上传文件
+            log.info(JSON.toJSONString(putObjectResult));
+            cosClient.shutdown();
 
-        //封装返回对象
-        CosUploadVo cosUploadVo = new CosUploadVo();
-        cosUploadVo.setUrl(uploadPath);
-        //图片临时访问url，回显使用
-        cosUploadVo.setShowUrl(this.getImageUrl(uploadPath));
-        return cosUploadVo;
+            //封装返回对象
+            CosUploadVo cosUploadVo = new CosUploadVo();
+            cosUploadVo.setUrl(uploadPath);
+            //图片临时访问url，回显使用
+            cosUploadVo.setShowUrl(this.getImageUrl(uploadPath));
+            return cosUploadVo;
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getMessage(e));
+            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
+        }
     }
 
     @Override

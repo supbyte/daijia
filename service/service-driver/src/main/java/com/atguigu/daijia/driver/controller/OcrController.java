@@ -31,7 +31,7 @@ public class OcrController {
     @Operation(summary = "身份证识别")
     @PostMapping("/idCardOcr")
     public Result<IdCardOcrVo> idCardOcr(@RequestPart("file") MultipartFile file) {
-        IdCardOcrVo idCardOcrVo = ocrService.idCardOcrByAlibaba(file);
+        IdCardOcrVo idCardOcrVo = ocrService.idCardOcrByTencent(file);
         return Result.ok(idCardOcrVo);
     }
 
@@ -41,7 +41,7 @@ public class OcrController {
     @Operation(summary = "驾驶证识别")
     @PostMapping("/driverLicenseOcr")
     public Result<DriverLicenseOcrVo> driverLicenseOcr(@RequestPart("file") MultipartFile file) {
-        return Result.ok(ocrService.driverLicenseOcrByAlibaba(file));
+        return Result.ok(ocrService.driverLicenseOcrByTencent(file));
     }
 }
 

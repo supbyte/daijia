@@ -2,6 +2,7 @@ package com.atguigu.daijia.driver.service.impl;
 
 import com.atguigu.daijia.driver.service.OrderService;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,5 +12,11 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class OrderServiceImpl implements OrderService {
 
+    @Resource
+    private OrderInfoFeignClient orderInfoFeignClient;
 
+    @Override
+    public Integer getOrderStatus(Long orderId) {
+        return orderInfoFeignClient.getOrderStatus(orderId).getData();
+    }
 }

@@ -27,7 +27,7 @@ public class NewOrderController {
      * 添加并开始新订单任务调度
      */
     @Operation(summary = "添加并开始新订单任务调度")
-    @GetMapping("/addAndStartTask")
+    @PostMapping("/addAndStartTask")
     public Result<Long> addAndStartTask(@RequestBody NewOrderTaskVo newOrderTaskVo){
         Long id = newOrderService.addAndStartTask(newOrderTaskVo);
         return Result.success(id);

@@ -25,7 +25,7 @@ public class JobHandler {
         xxlJobLog.setJobId(XxlJobHelper.getJobId());
         long startTime = System.currentTimeMillis();
         try{
-            // TODO 执行任务：搜索附近代驾司机
+            // 执行任务：搜索附近代驾司机
             newOrderService.executeTask(XxlJobHelper.getJobId());
             // 记录成功状态
             xxlJobLog.setStatus(1);

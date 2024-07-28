@@ -2,6 +2,7 @@ package com.atguigu.daijia.customer.service.impl;
 
 import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.customer.service.OrderService;
+import com.atguigu.daijia.dispatch.client.NewOrderFeignClient;
 import com.atguigu.daijia.map.client.MapFeignClient;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
@@ -9,6 +10,7 @@ import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
 import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
+import com.atguigu.daijia.model.vo.dispatch.NewOrderTaskVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
@@ -31,6 +33,8 @@ public class OrderServiceImpl implements OrderService {
     private FeeRuleFeignClient feeRuleFeignClient;
     @Resource
     private OrderInfoFeignClient orderInfoFeignClient;
+    @Resource
+    private NewOrderFeignClient newOrderFeignClient;
 
     @Override
     public ExpectOrderVo expectOrder(ExpectOrderForm expectOrderForm) {
@@ -73,10 +77,21 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(submitOrderForm,orderInfoForm);
         orderInfoForm.setExpectDistance(drivingLineVo.getDistance());
         orderInfoForm.setExpectAmount(feeRuleResponseVo.getTotalAmount());
-        Result<Long> result = orderInfoFeignClient.saveOrderInfo(orderInfoForm);
+        Long orderId = orderInfoFeignClient.saveOrderInfo(orderInfoForm).getData();
 
-        //TODO 呼叫附近可以接单的司机抢单
-        return result.getData();
+        //任务调度 呼叫附近可以接单的司机抢单
+        // 创建目标对象
+        NewOrderTaskVo newOrderDispatchVo = new NewOrderTaskVo();
+
+        // 使用BeanUtils复制属性
+        BeanUtils.copyProperties(newOrderDispatchVo, orderInfoForm);
+
+        // 手动设置不能通过BeanUtils复制的属性
+        newOrderDispatchVo.setOrderId(orderId);
+        newOrderDispatchVo.setExpectTime(drivingLineVo.getDuration());
+        newOrderDispatchVo.setCreateTime(new Date());
+
+        return newOrderFeignClient.addAndStartTask(newOrderDispatchVo).getData();
     }
 
     @Override

@@ -42,4 +42,14 @@ public interface DriverService {
      * 验证司机人脸
      */
     Boolean verifyDriverFace(DriverFaceModelForm driverFaceModelForm);
+
+    /**
+     * 司机开始接单
+     */
+    Boolean startService(Long driverId);
+
+    /**
+     * 司机停止接单
+     */
+    Boolean stopService(Long driverId);
 }

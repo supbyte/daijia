@@ -79,19 +79,18 @@ public class OrderServiceImpl implements OrderService {
         orderInfoForm.setExpectAmount(feeRuleResponseVo.getTotalAmount());
         Long orderId = orderInfoFeignClient.saveOrderInfo(orderInfoForm).getData();
 
-        //任务调度 呼叫附近可以接单的司机抢单
+        // 任务调度 呼叫附近可以接单的司机抢单
         // 创建目标对象
-        NewOrderTaskVo newOrderDispatchVo = new NewOrderTaskVo();
+        NewOrderTaskVo newOrderTaskVo = new NewOrderTaskVo();
 
         // 使用BeanUtils复制属性
-        BeanUtils.copyProperties(newOrderDispatchVo, orderInfoForm);
+        BeanUtils.copyProperties(orderInfoForm,newOrderTaskVo);
 
         // 手动设置不能通过BeanUtils复制的属性
-        newOrderDispatchVo.setOrderId(orderId);
-        newOrderDispatchVo.setExpectTime(drivingLineVo.getDuration());
-        newOrderDispatchVo.setCreateTime(new Date());
-
-        return newOrderFeignClient.addAndStartTask(newOrderDispatchVo).getData();
+        newOrderTaskVo.setOrderId(orderId);
+        newOrderTaskVo.setExpectTime(drivingLineVo.getDuration());
+        newOrderTaskVo.setCreateTime(new Date());
+        return newOrderFeignClient.addAndStartTask(newOrderTaskVo).getData();
     }
 
     @Override

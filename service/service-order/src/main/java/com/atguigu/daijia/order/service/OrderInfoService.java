@@ -31,4 +31,9 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * 查找司机端当前订单
      */
     CurrentOrderInfoVo searchDriverCurrentOrder(Long driverId);
+
+    /**
+     * 司机到达起始点
+     */
+    Boolean driverArriveStartLocation(Long orderId, Long driverId);
 }

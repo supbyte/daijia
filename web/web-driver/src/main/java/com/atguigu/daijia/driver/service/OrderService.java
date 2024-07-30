@@ -46,4 +46,9 @@ public interface OrderService {
      * 根据订单id获取司机基本信息
      */
     DriverInfoVo getDriverInfo(Long orderId, Long customerId);
+
+    /**
+     * 司机到达代驾起始地点
+     */
+    Boolean driverArriveStartLocation(Long orderId, Long driverId);
 }

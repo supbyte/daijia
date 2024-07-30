@@ -49,4 +49,10 @@ public interface OrderInfoFeignClient {
      */
     @GetMapping("/order/info/getOrderInfo/{orderId}")
     Result<OrderInfo> getOrderInfo(@PathVariable("orderId") Long orderId);
+
+    /**
+     * 司机到达起始点
+     */
+    @GetMapping("/order/info/driverArriveStartLocation/{orderId}/{driverId}")
+    Result<Boolean> driverArriveStartLocation(@PathVariable("orderId") Long orderId, @PathVariable("driverId") Long driverId);
 }

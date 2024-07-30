@@ -7,6 +7,7 @@ import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.entity.order.OrderStatusLog;
 import com.atguigu.daijia.model.enums.OrderStatus;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
+import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.order.mapper.OrderInfoMapper;
 import com.atguigu.daijia.order.mapper.OrderStatusLogMapper;
 import com.atguigu.daijia.order.service.OrderInfoService;
@@ -20,7 +21,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -142,5 +145,41 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
         // 返回抢单成功标志
         return true;
+    }
+
+    @Override
+    public CurrentOrderInfoVo searchCustomerCurrentOrder(Long customerId) {
+        // 封装查询条件
+        LambdaQueryWrapper<OrderInfo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(OrderInfo::getCustomerId,customerId);
+        //各种状态
+        Integer[] statusArray = {
+                OrderStatus.ACCEPTED.getStatus(),
+                OrderStatus.DRIVER_ARRIVED.getStatus(),
+                OrderStatus.UPDATE_CART_INFO.getStatus(),
+                OrderStatus.START_SERVICE.getStatus(),
+                OrderStatus.END_SERVICE.getStatus(),
+                OrderStatus.UNPAID.getStatus()
+        };
+        queryWrapper.in(OrderInfo::getStatus, Arrays.asList(statusArray));
+        // 获取最新的一条记录
+        queryWrapper.orderByDesc(OrderInfo::getId);
+        queryWrapper.last("limit 1");
+        // 调用方法
+        OrderInfo orderInfo = orderInfoMapper.selectOne(queryWrapper);
+        // 封装到CurrentOrderInfoVo
+        CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
+        if (orderInfo != null){
+            // 设置当前订单id
+            currentOrderInfoVo.setOrderId(orderInfo.getId());
+            // 设置当前订单状态
+            currentOrderInfoVo.setStatus(orderInfo.getStatus());
+            // 设置当前订单是否存在
+            currentOrderInfoVo.setIsHasCurrentOrder(true);
+        }else {
+            currentOrderInfoVo.setIsHasCurrentOrder(false);
+        }
+
+        return currentOrderInfoVo;
     }
 }

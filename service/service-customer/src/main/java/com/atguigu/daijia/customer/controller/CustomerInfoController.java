@@ -5,6 +5,7 @@ import com.atguigu.daijia.customer.service.CustomerInfoService;
 import com.atguigu.daijia.model.entity.customer.CustomerInfo;
 import com.atguigu.daijia.model.form.customer.UpdateWxPhoneForm;
 import com.atguigu.daijia.model.vo.customer.CustomerLoginVo;
+import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,9 @@ public class CustomerInfoController {
 	@Resource
 	private CustomerInfoService customerInfoService;
 
-	//微信小程序登录接口
+	/**
+	 *微信小程序登录接口
+	 */
 	@Operation(summary = "小程序授权登录")
 	@GetMapping("/login/{code}")
 	public Result<Long> login(@PathVariable String code) {
@@ -43,5 +46,6 @@ public class CustomerInfoController {
 	public Result<Boolean> updateWxPhoneNumber(@RequestBody UpdateWxPhoneForm updateWxPhoneForm) {
 		return Result.ok(customerInfoService.updateWxPhoneNumber(updateWxPhoneForm));
 	}
+
 }
 

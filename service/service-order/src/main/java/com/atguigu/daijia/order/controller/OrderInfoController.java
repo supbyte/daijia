@@ -36,5 +36,14 @@ public class OrderInfoController {
     public Result<Integer> getOrderStatus(@PathVariable Long orderId) {
         return Result.ok(orderInfoService.getOrderStatus(orderId));
     }
+
+    /**
+     * 司机抢单
+     */
+    @Operation(summary = "司机抢单")
+    @GetMapping("/robNewOrder/{driverId}/{orderId}")
+    public Result<Boolean> robNewOrder(@PathVariable Long driverId, @PathVariable Long orderId) {
+        return Result.ok(orderInfoService.robNewOrder(driverId, orderId));
+    }
 }
 

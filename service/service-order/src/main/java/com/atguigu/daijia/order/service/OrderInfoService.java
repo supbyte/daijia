@@ -26,4 +26,9 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * 查找乘客端当前订单
      */
     CurrentOrderInfoVo searchCustomerCurrentOrder(Long customerId);
+
+    /**
+     * 查找司机端当前订单
+     */
+    CurrentOrderInfoVo searchDriverCurrentOrder(Long driverId);
 }

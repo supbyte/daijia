@@ -48,15 +48,14 @@ public class OrderController {
     }
 
     /**
-     * TODO 查找司机端当前订单
+     * 查找司机端当前订单
      */
-    @Operation(summary = "查找司机端当前订单")
+    @Operation(summary = "司机端查找当前订单")
     @GuiguLogin
     @GetMapping("/searchDriverCurrentOrder")
     public Result<CurrentOrderInfoVo> searchDriverCurrentOrder() {
-        CurrentOrderInfoVo currentOrderInfoVo = new CurrentOrderInfoVo();
-        currentOrderInfoVo.setIsHasCurrentOrder(false);
-        return Result.ok(currentOrderInfoVo);
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.searchDriverCurrentOrder(driverId));
     }
 
     /**

@@ -30,6 +30,15 @@ public class OrderInfoController {
     }
 
     /**
+     * 司机端查找当前订单
+     */
+    @Operation(summary = "司机端查找当前订单")
+    @GetMapping("/searchDriverCurrentOrder/{driverId}")
+    public Result<CurrentOrderInfoVo> searchDriverCurrentOrder(@PathVariable Long driverId) {
+        return Result.ok(orderInfoService.searchDriverCurrentOrder(driverId));
+    }
+
+    /**
      *保存订单信息
      */
     @Operation(summary = "保存订单信息")

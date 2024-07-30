@@ -5,9 +5,11 @@ import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.common.util.AuthContextHolder;
 import com.atguigu.daijia.driver.client.DriverInfoFeignClient;
 import com.atguigu.daijia.driver.service.DriverService;
+import com.atguigu.daijia.driver.service.OrderService;
 import com.atguigu.daijia.model.form.driver.DriverFaceModelForm;
 import com.atguigu.daijia.model.form.driver.UpdateDriverAuthInfoForm;
 import com.atguigu.daijia.model.vo.driver.DriverAuthInfoVo;
+import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.driver.DriverLoginVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +26,8 @@ public class DriverController {
 
     @Resource
     private DriverService driverService;
+    @Resource
+    private OrderService orderService;
 
     /**
      * 小程序授司机端登录
@@ -102,6 +106,9 @@ public class DriverController {
         return Result.ok(driverService.verifyDriverFace(driverFaceModelForm));
     }
 
+    /**
+     * 开始接单服务
+     */
     @Operation(summary = "开始接单服务")
     @GuiguLogin
     @GetMapping("/startService")
@@ -110,12 +117,26 @@ public class DriverController {
         return Result.ok(driverService.startService(driverId));
     }
 
+    /**
+     * 停止接单服务
+     */
     @Operation(summary = "停止接单服务")
     @GuiguLogin
     @GetMapping("/stopService")
     public Result<Boolean> stopService() {
         Long driverId = AuthContextHolder.getUserId();
         return Result.ok(driverService.stopService(driverId));
+    }
+
+    /**
+     * 根据订单id获取司机基本信息
+     */
+    @Operation(summary = "根据订单id获取司机基本信息")
+    @GuiguLogin
+    @GetMapping("/getDriverInfo/{orderId}")
+    public Result<DriverInfoVo> getDriverInfo(@PathVariable Long orderId) {
+        Long customerId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.getDriverInfo(orderId, customerId));
     }
 }
 

@@ -26,7 +26,7 @@ public interface DriverInfoFeignClient {
      * 获取司机信息
      */
     @GetMapping("/driver/info/getDriverLoginInfo/{driverId}")
-    public Result<DriverLoginVo> getDriverInfo(@PathVariable Long driverId);
+    public Result<DriverLoginVo> getDriverLoginInfo(@PathVariable Long driverId);
 
     /**
      * 获取司机认证信息
@@ -69,4 +69,10 @@ public interface DriverInfoFeignClient {
      */
     @GetMapping("/driver/info/updateServiceStatus/{driverId}/{status}")
     Result<Boolean> updateServiceStatus(@PathVariable("driverId") Long driverId, @PathVariable("status") Integer status);
+
+    /**
+     * 获取司机基本信息
+     */
+    @GetMapping("/driver/info/getDriverInfo/{driverId}")
+    Result<DriverInfoVo> getDriverInfo(@PathVariable("driverId") Long driverId);
 }

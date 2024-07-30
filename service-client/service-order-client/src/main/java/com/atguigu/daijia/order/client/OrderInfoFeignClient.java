@@ -1,6 +1,7 @@
 package com.atguigu.daijia.order.client;
 
 import com.atguigu.daijia.common.result.Result;
+import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -42,4 +43,10 @@ public interface OrderInfoFeignClient {
      */
     @GetMapping("/order/info/robNewOrder/{driverId}/{orderId}")
     Result<Boolean> robNewOrder(@PathVariable("driverId") Long driverId, @PathVariable("orderId") Long orderId);
+
+    /**
+     * 根据订单id获取订单信息
+     */
+    @GetMapping("/order/info/getOrderInfo/{orderId}")
+    Result<OrderInfo> getOrderInfo(@PathVariable("orderId") Long orderId);
 }

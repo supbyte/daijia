@@ -1,6 +1,7 @@
 package com.atguigu.daijia.order.controller;
 
 import com.atguigu.daijia.common.result.Result;
+import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.form.order.OrderInfoForm;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.order.service.OrderInfoService;
@@ -39,7 +40,7 @@ public class OrderInfoController {
     }
 
     /**
-     *保存订单信息
+     * 保存订单信息
      */
     @Operation(summary = "保存订单信息")
     @PostMapping("/saveOrderInfo")
@@ -63,6 +64,15 @@ public class OrderInfoController {
     @GetMapping("/robNewOrder/{driverId}/{orderId}")
     public Result<Boolean> robNewOrder(@PathVariable Long driverId, @PathVariable Long orderId) {
         return Result.ok(orderInfoService.robNewOrder(driverId, orderId));
+    }
+
+    /**
+     * 根据订单id获取订单信息
+     */
+    @Operation(summary = "根据订单id获取订单信息")
+    @GetMapping("/getOrderInfo/{orderId}")
+    public Result<OrderInfo> getOrderInfo(@PathVariable Long orderId) {
+        return Result.ok(orderInfoService.getById(orderId));
     }
 }
 

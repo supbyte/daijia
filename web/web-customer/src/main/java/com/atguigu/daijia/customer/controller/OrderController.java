@@ -7,7 +7,9 @@ import com.atguigu.daijia.customer.service.OrderService;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
+import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
+import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +66,27 @@ public class OrderController {
     @GetMapping("/getOrderStatus/{orderId}")
     public Result<Integer> getOrderStatus(@PathVariable Long orderId) {
         return Result.ok(orderService.getOrderStatus(orderId));
+    }
+
+    /**
+     * 获取订单信息
+     */
+    @Operation(summary = "获取订单信息")
+    @GuiguLogin
+    @GetMapping("/getOrderInfo/{orderId}")
+    public Result<OrderInfoVo> getOrderInfo(@PathVariable Long orderId) {
+        Long customerId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.getOrderInfo(orderId, customerId));
+    }
+
+    /**
+     * 司机赶往代驾起始点：获取订单经纬度位置
+     */
+    @Operation(summary = "司机赶往代驾起始点：获取订单经纬度位置")
+    @GuiguLogin
+    @GetMapping("/getCacheOrderLocation/{orderId}")
+    public Result<OrderLocationVo> getOrderLocation(@PathVariable Long orderId) {
+        return Result.ok(orderService.getCacheOrderLocation(orderId));
     }
 
 }

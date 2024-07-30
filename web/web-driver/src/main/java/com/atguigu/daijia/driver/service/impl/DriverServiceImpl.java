@@ -55,7 +55,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public DriverLoginVo getDriverLoginInfo(Long driverId) {
-        return driverInfoFeignClient.getDriverInfo(driverId).getData();
+        return driverInfoFeignClient.getDriverLoginInfo(driverId).getData();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public Boolean startService(Long driverId) {
         //判断认证状态
-        DriverLoginVo driverLoginVo = driverInfoFeignClient.getDriverInfo(driverId).getData();
+        DriverLoginVo driverLoginVo = driverInfoFeignClient.getDriverLoginInfo(driverId).getData();
         if (driverLoginVo.getAuthStatus() != 2){
             throw new GuiguException(ResultCodeEnum.AUTH_ERROR);
         }

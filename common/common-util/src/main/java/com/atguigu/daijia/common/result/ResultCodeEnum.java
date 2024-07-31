@@ -18,6 +18,7 @@ public enum ResultCodeEnum {
     FEIGN_FAIL(207, "远程调用失败"),
     UPDATE_ERROR(204, "数据更新失败"),
 
+
     ARGUMENT_VALID_ERROR(210, "参数校验异常"),
     SIGN_ERROR(300, "签名错误"),
     SIGN_OVERDUE(301, "签名已过期"),

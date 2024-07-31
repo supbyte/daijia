@@ -1,6 +1,8 @@
 package com.atguigu.daijia.driver.service;
 
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
+import com.atguigu.daijia.model.form.order.StartDriveForm;
+import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
@@ -42,13 +44,19 @@ public interface OrderService {
      */
     DrivingLineVo calculateDrivingLine(CalculateDrivingLineForm calculateDrivingLineForm);
 
-    /**
-     * 根据订单id获取司机基本信息
-     */
-    DriverInfoVo getDriverInfo(Long orderId, Long customerId);
 
     /**
      * 司机到达代驾起始地点
      */
     Boolean driverArriveStartLocation(Long orderId, Long driverId);
+
+    /**
+     * 更新代驾车辆信息
+     */
+    Boolean updateOrderCart(UpdateOrderCartForm updateOrderCartForm);
+
+    /**
+     * 开始代驾服务
+     */
+    Boolean startDrive(StartDriveForm startDriveForm);
 }

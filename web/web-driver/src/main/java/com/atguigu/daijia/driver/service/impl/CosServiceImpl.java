@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class CosServiceImpl implements CosService {
 
-    @Autowired
+    @Resource
     private CosFeignClient cosFeignClient;
 
     //文件上传接口

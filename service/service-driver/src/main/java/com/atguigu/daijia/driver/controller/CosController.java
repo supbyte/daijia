@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class CosController {
 
-    @Autowired
+    @Resource
     private CosService cosService;
 
     /**

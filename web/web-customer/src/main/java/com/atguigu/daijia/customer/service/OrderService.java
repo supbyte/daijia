@@ -4,8 +4,10 @@ import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
+import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.map.OrderLocationVo;
+import com.atguigu.daijia.model.vo.map.OrderServiceLastLocationVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 
@@ -45,4 +47,14 @@ public interface OrderService {
      * 计算最佳驾驶线路
      */
     DrivingLineVo calculateDrivingLine(CalculateDrivingLineForm calculateDrivingLineForm);
+
+    /**
+     * 获取司机基本信息
+     */
+    DriverInfoVo getDriverInfo(Long orderId, Long customerId);
+
+    /**
+     * 代驾服务：获取订单服务最后一个位置信息
+     */
+    OrderServiceLastLocationVo getOrderServiceLastLocation(Long orderId);
 }

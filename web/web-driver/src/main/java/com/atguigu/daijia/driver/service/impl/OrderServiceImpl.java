@@ -8,6 +8,8 @@ import com.atguigu.daijia.driver.service.OrderService;
 import com.atguigu.daijia.map.client.MapFeignClient;
 import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
+import com.atguigu.daijia.model.form.order.StartDriveForm;
+import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
@@ -74,17 +76,19 @@ public class OrderServiceImpl implements OrderService {
         return mapFeignClient.calculateDrivingLine(calculateDrivingLineForm).getData();
     }
 
-    @Override
-    public DriverInfoVo getDriverInfo(Long orderId, Long customerId) {
-        OrderInfo orderInfo = orderInfoFeignClient.getOrderInfo(orderId).getData();
-        if (orderInfo.getCustomerId().longValue() != customerId.longValue()) {
-            throw new GuiguException(ResultCodeEnum.ILLEGAL_REQUEST);
-        }
-        return driverInfoFeignClient.getDriverInfo(orderInfo.getDriverId()).getData();
-    }
 
     @Override
     public Boolean driverArriveStartLocation(Long orderId, Long driverId) {
         return orderInfoFeignClient.driverArriveStartLocation(orderId, driverId).getData();
+    }
+
+    @Override
+    public Boolean updateOrderCart(UpdateOrderCartForm updateOrderCartForm) {
+        return orderInfoFeignClient.updateOrderCart(updateOrderCartForm).getData();
+    }
+
+    @Override
+    public Boolean startDrive(StartDriveForm startDriveForm) {
+        return orderInfoFeignClient.startDrive(startDriveForm).getData();
     }
 }

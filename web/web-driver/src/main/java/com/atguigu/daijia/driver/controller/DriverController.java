@@ -128,15 +128,5 @@ public class DriverController {
         return Result.ok(driverService.stopService(driverId));
     }
 
-    /**
-     * 根据订单id获取司机基本信息
-     */
-    @Operation(summary = "根据订单id获取司机基本信息")
-    @GuiguLogin
-    @GetMapping("/getDriverInfo/{orderId}")
-    public Result<DriverInfoVo> getDriverInfo(@PathVariable Long orderId) {
-        Long customerId = AuthContextHolder.getUserId();
-        return Result.ok(orderService.getDriverInfo(orderId, customerId));
-    }
 }
 

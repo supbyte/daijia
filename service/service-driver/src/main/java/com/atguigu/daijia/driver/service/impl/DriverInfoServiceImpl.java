@@ -317,7 +317,7 @@ public class DriverInfoServiceImpl extends ServiceImpl<DriverInfoMapper, DriverI
         int firstYear = new DateTime(driverInfo.getDriverLicenseIssueDate()).getYear();
         int driverLicenseAge = currentYear - firstYear;
         driverInfoVo.setDriverLicenseAge(driverLicenseAge);
-
+        log.info("司机基本信息：{}",driverInfoVo);
         return driverInfoVo;
     }
 }

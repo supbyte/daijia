@@ -4,8 +4,10 @@ import com.atguigu.daijia.common.login.GuiguLogin;
 import com.atguigu.daijia.common.result.Result;
 import com.atguigu.daijia.common.util.AuthContextHolder;
 import com.atguigu.daijia.customer.service.CustomerService;
+import com.atguigu.daijia.customer.service.OrderService;
 import com.atguigu.daijia.model.form.customer.UpdateWxPhoneForm;
 import com.atguigu.daijia.model.vo.customer.CustomerLoginVo;
+import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -21,6 +23,8 @@ public class CustomerController {
 
     @Resource
     private CustomerService customerService;
+    @Resource
+    private OrderService orderService;
 
     //微信小程序登录接口
     @Operation(summary = "小程序授权登录")
@@ -57,6 +61,7 @@ public class CustomerController {
         updateWxPhoneForm.setCustomerId(AuthContextHolder.getUserId());
         return Result.ok(customerService.updateWxPhoneNumber(updateWxPhoneForm));
     }
+
 
 }
 

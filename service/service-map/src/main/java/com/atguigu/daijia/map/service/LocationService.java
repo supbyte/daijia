@@ -1,10 +1,12 @@
 package com.atguigu.daijia.map.service;
 
+import com.atguigu.daijia.model.form.map.OrderServiceLocationForm;
 import com.atguigu.daijia.model.form.map.SearchNearByDriverForm;
 import com.atguigu.daijia.model.form.map.UpdateDriverLocationForm;
 import com.atguigu.daijia.model.form.map.UpdateOrderLocationForm;
 import com.atguigu.daijia.model.vo.map.NearByDriverVo;
 import com.atguigu.daijia.model.vo.map.OrderLocationVo;
+import com.atguigu.daijia.model.vo.map.OrderServiceLastLocationVo;
 
 import java.util.List;
 
@@ -34,4 +36,14 @@ public interface LocationService {
      * 司机赶往代驾起始点：获取订单经纬度位置
      */
     OrderLocationVo getCacheOrderLocation(Long orderId);
+
+    /**
+     * 批量保存代驾服务订单位置
+     */
+    Boolean saveOrderServiceLocation(List<OrderServiceLocationForm> orderLocationServiceFormList);
+
+    /**
+     * 代驾服务：获取订单服务最后一个位置信息
+     */
+    OrderServiceLastLocationVo getOrderServiceLastLocation(Long orderId);
 }

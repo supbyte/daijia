@@ -5,23 +5,37 @@ import com.atguigu.daijia.common.result.ResultCodeEnum;
 import com.atguigu.daijia.dispatch.client.NewOrderFeignClient;
 import com.atguigu.daijia.driver.client.DriverInfoFeignClient;
 import com.atguigu.daijia.driver.service.OrderService;
+import com.atguigu.daijia.map.client.LocationFeignClient;
 import com.atguigu.daijia.map.client.MapFeignClient;
 import com.atguigu.daijia.model.entity.order.OrderInfo;
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
+import com.atguigu.daijia.model.form.order.OrderFeeForm;
 import com.atguigu.daijia.model.form.order.StartDriveForm;
+import com.atguigu.daijia.model.form.order.UpdateOrderBillForm;
 import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
+import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
+import com.atguigu.daijia.model.form.rules.ProfitsharingRuleRequestForm;
 import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
 import com.atguigu.daijia.model.vo.order.NewOrderDataVo;
 import com.atguigu.daijia.model.vo.order.OrderInfoVo;
+import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
+import com.atguigu.daijia.model.vo.rules.ProfitsharingRuleResponseVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
+import com.atguigu.daijia.rules.client.FeeRuleFeignClient;
+import com.atguigu.daijia.rules.client.ProfitsharingRuleFeignClient;
+import com.atguigu.daijia.rules.client.RewardRuleFeignClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +51,13 @@ public class OrderServiceImpl implements OrderService {
     @Resource
     private MapFeignClient mapFeignClient;
     @Resource
-    private DriverInfoFeignClient driverInfoFeignClient;
+    private LocationFeignClient locationFeignClient;
+    @Resource
+    private FeeRuleFeignClient feeRuleFeignClient;
+    @Resource
+    private RewardRuleFeignClient rewardRuleFeignClient;
+    @Resource
+    private ProfitsharingRuleFeignClient profitsharingRuleFeignClient;
 
     @Override
     public Integer getOrderStatus(Long orderId) {
@@ -90,5 +110,58 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Boolean startDrive(StartDriveForm startDriveForm) {
         return orderInfoFeignClient.startDrive(startDriveForm).getData();
+    }
+
+    @Override
+    public Boolean endDrive(OrderFeeForm orderFeeForm) {
+        // 1.根据订单id获取订单信息，判断该订单的接单司机是否匹配
+        OrderInfo orderInfo = orderInfoFeignClient.getOrderInfo(orderFeeForm.getOrderId()).getData();
+        if (!Objects.equals(orderInfo.getDriverId(), orderFeeForm.getDriverId())){
+            throw new GuiguException(ResultCodeEnum.ILLEGAL_REQUEST);
+        }
+
+        // 2.计算订单实际里程
+        BigDecimal realDistance = locationFeignClient.calculateOrderRealDistance(orderFeeForm.getOrderId()).getData();
+
+        // 3.计算代驾实际费用
+        FeeRuleRequestForm feeRuleRequestForm = new FeeRuleRequestForm();
+        // 3.1设置实际路程
+        feeRuleRequestForm.setDistance(realDistance);
+        // 3.2设置服务开始时间
+        feeRuleRequestForm.setStartTime(orderInfo.getStartServiceTime());
+        //long between = ChronoUnit.MINUTES.between(orderInfo.getArriveTime().toInstant(), orderInfo.getArriveTime().toInstant());
+        Integer waitMinute = Math.abs((int)((orderInfo.getArriveTime().getTime()-orderInfo.getAcceptTime().getTime())/(1000 * 60)));
+        feeRuleRequestForm.setWaitMinute(waitMinute);
+        // 3.3远程调用得到代驾费用对象
+        FeeRuleResponseVo feeRuleResponseVo = feeRuleFeignClient.calculateOrderFee(feeRuleRequestForm).getData();
+        // 实际费用 = 代驾费用 + 其他费用
+        BigDecimal totalAmount = feeRuleResponseVo.getTotalAmount()
+                // 司机好处费
+                .add(orderInfo.getFavourFee())
+                // 路桥费
+                .add(orderFeeForm.getTollFee())
+                // 停车费
+                .add(orderFeeForm.getParkingFee())
+                // 其他费用
+                .add(orderFeeForm.getOtherFee());
+        feeRuleResponseVo.setTotalAmount(totalAmount);
+
+        // 4.计算系统奖励金额
+        String startTime = new DateTime(orderInfo.getStartServiceTime()).toString("yyyy-MM-dd") + " 00:00:00";
+        String endTime = new DateTime(orderInfo.getStartServiceTime()).toString("yyyy-MM-dd") + " 24:00:00";
+        Long orderNum = orderInfoFeignClient.getOrderNumByTime(startTime, endTime).getData();
+
+        // 5.计算订单分账信息
+        ProfitsharingRuleRequestForm profitsharingRuleRequestForm = new ProfitsharingRuleRequestForm();
+        profitsharingRuleRequestForm.setOrderAmount(feeRuleResponseVo.getTotalAmount());
+        profitsharingRuleRequestForm.setOrderNum(orderNum);
+        ProfitsharingRuleResponseVo profitsharingRuleResponseVo = profitsharingRuleFeignClient.calculateOrderProfitsharingFee(profitsharingRuleRequestForm).getData();
+
+        // 6.封装实体类，调用远程接口更新订单，添加账单和分账信息
+        UpdateOrderBillForm updateOrderBillForm = new UpdateOrderBillForm();
+        BeanUtils.copyProperties(profitsharingRuleResponseVo, updateOrderBillForm);
+        updateOrderBillForm.setProfitsharingRuleId(profitsharingRuleResponseVo.getProfitsharingRuleId());
+
+        return orderInfoFeignClient.endDrive(updateOrderBillForm).getData();
     }
 }

@@ -103,5 +103,14 @@ public class OrderInfoController {
         Boolean flag = orderInfoService.startDriver(startDriveForm);
         return Result.ok(flag);
     }
+
+    /**
+     * 根据时间段获取订单数
+     */
+    @Operation(summary = "根据时间段获取订单数")
+    @GetMapping("/getOrderNumByTime/{startTime}/{endTime}")
+    public Result<Long> getOrderNumByTime(@PathVariable String startTime, @PathVariable String endTime) {
+        return Result.ok(orderInfoService.getOrderNumByTime(startTime, endTime));
+    }
 }
 

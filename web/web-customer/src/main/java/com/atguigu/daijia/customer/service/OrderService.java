@@ -3,6 +3,7 @@ package com.atguigu.daijia.customer.service;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
+import com.atguigu.daijia.model.vo.base.PageVo;
 import com.atguigu.daijia.model.vo.customer.ExpectOrderVo;
 import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
@@ -57,4 +58,9 @@ public interface OrderService {
      * 代驾服务：获取订单服务最后一个位置信息
      */
     OrderServiceLastLocationVo getOrderServiceLastLocation(Long orderId);
+
+    /**
+     * 获取乘客订单分页列表
+     */
+    PageVo findCustomerOrderPage(Long customerId, Long page, Long limit);
 }

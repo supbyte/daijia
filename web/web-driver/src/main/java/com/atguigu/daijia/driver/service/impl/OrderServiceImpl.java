@@ -17,6 +17,7 @@ import com.atguigu.daijia.model.form.order.UpdateOrderBillForm;
 import com.atguigu.daijia.model.form.order.UpdateOrderCartForm;
 import com.atguigu.daijia.model.form.rules.FeeRuleRequestForm;
 import com.atguigu.daijia.model.form.rules.ProfitsharingRuleRequestForm;
+import com.atguigu.daijia.model.form.rules.RewardRuleRequestForm;
 import com.atguigu.daijia.model.vo.driver.DriverInfoVo;
 import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.map.OrderLocationVo;
@@ -26,6 +27,7 @@ import com.atguigu.daijia.model.vo.order.NewOrderDataVo;
 import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import com.atguigu.daijia.model.vo.rules.ProfitsharingRuleResponseVo;
+import com.atguigu.daijia.model.vo.rules.RewardRuleResponseVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
 import com.atguigu.daijia.rules.client.FeeRuleFeignClient;
 import com.atguigu.daijia.rules.client.ProfitsharingRuleFeignClient;
@@ -166,19 +168,42 @@ public class OrderServiceImpl implements OrderService {
                 .add(orderFeeForm.getOtherFee());
         feeRuleResponseVo.setTotalAmount(totalAmount);
 
-        // 4.计算系统奖励金额
+        //4 计算系统奖励
         String startTime = new DateTime(orderInfo.getStartServiceTime()).toString("yyyy-MM-dd") + " 00:00:00";
         String endTime = new DateTime(orderInfo.getStartServiceTime()).toString("yyyy-MM-dd") + " 24:00:00";
         Long orderNum = orderInfoFeignClient.getOrderNumByTime(startTime, endTime).getData();
+        //4.2.封装参数
+        RewardRuleRequestForm rewardRuleRequestForm = new RewardRuleRequestForm();
+        rewardRuleRequestForm.setStartTime(orderInfo.getStartServiceTime());
+        rewardRuleRequestForm.setOrderNum(orderNum);
 
-        // 5.计算订单分账信息
+        RewardRuleResponseVo rewardRuleResponseVo = rewardRuleFeignClient.calculateOrderRewardFee(rewardRuleRequestForm).getData();
+
+        //5 计算分账信息
         ProfitsharingRuleRequestForm profitsharingRuleRequestForm = new ProfitsharingRuleRequestForm();
         profitsharingRuleRequestForm.setOrderAmount(feeRuleResponseVo.getTotalAmount());
         profitsharingRuleRequestForm.setOrderNum(orderNum);
+
         ProfitsharingRuleResponseVo profitsharingRuleResponseVo = profitsharingRuleFeignClient.calculateOrderProfitsharingFee(profitsharingRuleRequestForm).getData();
 
-        // 6.封装实体类，调用远程接口更新订单，添加账单和分账信息
+        //6 封装实体类，结束代驾更新订单，添加账单和分账信息
         UpdateOrderBillForm updateOrderBillForm = new UpdateOrderBillForm();
+        updateOrderBillForm.setOrderId(orderFeeForm.getOrderId());
+        updateOrderBillForm.setDriverId(orderFeeForm.getDriverId());
+        //路桥费、停车费、其他费用
+        updateOrderBillForm.setTollFee(orderFeeForm.getTollFee());
+        updateOrderBillForm.setParkingFee(orderFeeForm.getParkingFee());
+        updateOrderBillForm.setOtherFee(orderFeeForm.getOtherFee());
+        //乘客好处费
+        updateOrderBillForm.setFavourFee(orderInfo.getFavourFee());
+
+        //实际里程
+        updateOrderBillForm.setRealDistance(realDistance);
+        //订单奖励信息
+        BeanUtils.copyProperties(rewardRuleResponseVo, updateOrderBillForm);
+        //代驾费用信息
+        BeanUtils.copyProperties(feeRuleResponseVo, updateOrderBillForm);
+        //分账相关信息
         BeanUtils.copyProperties(profitsharingRuleResponseVo, updateOrderBillForm);
         updateOrderBillForm.setProfitsharingRuleId(profitsharingRuleResponseVo.getProfitsharingRuleId());
 

@@ -2,6 +2,7 @@ package com.atguigu.daijia.model.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 public enum OrderStatus {
@@ -19,7 +20,9 @@ public enum OrderStatus {
     ;
 
     @EnumValue
-    private Integer status;
+    private  Integer status;
+    @Setter
+    @Getter
     private String comment;
 
     OrderStatus(Integer status, String comment) {
@@ -27,11 +30,4 @@ public enum OrderStatus {
         this.comment = comment;
     }
 
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
 }

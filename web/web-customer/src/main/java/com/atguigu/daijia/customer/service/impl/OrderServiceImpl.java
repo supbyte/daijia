@@ -9,6 +9,7 @@ import com.atguigu.daijia.driver.client.DriverInfoFeignClient;
 import com.atguigu.daijia.map.client.LocationFeignClient;
 import com.atguigu.daijia.map.client.MapFeignClient;
 import com.atguigu.daijia.model.entity.order.OrderInfo;
+import com.atguigu.daijia.model.enums.OrderStatus;
 import com.atguigu.daijia.model.form.customer.ExpectOrderForm;
 import com.atguigu.daijia.model.form.customer.SubmitOrderForm;
 import com.atguigu.daijia.model.form.map.CalculateDrivingLineForm;
@@ -22,6 +23,7 @@ import com.atguigu.daijia.model.vo.map.DrivingLineVo;
 import com.atguigu.daijia.model.vo.map.OrderLocationVo;
 import com.atguigu.daijia.model.vo.map.OrderServiceLastLocationVo;
 import com.atguigu.daijia.model.vo.order.CurrentOrderInfoVo;
+import com.atguigu.daijia.model.vo.order.OrderBillVo;
 import com.atguigu.daijia.model.vo.order.OrderInfoVo;
 import com.atguigu.daijia.model.vo.rules.FeeRuleResponseVo;
 import com.atguigu.daijia.order.client.OrderInfoFeignClient;
@@ -122,14 +124,29 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderInfoVo getOrderInfo(Long orderId, Long customerId) {
         OrderInfo orderInfo = orderInfoFeignClient.getOrderInfo(orderId).getData();
-        // 判断当前订单信息是否为当前用户
-        if (!Objects.equals(orderInfo.getCustomerId(), customerId)){
+        //判断
+        if(!Objects.equals(orderInfo.getCustomerId(), customerId)) {
             throw new GuiguException(ResultCodeEnum.ILLEGAL_REQUEST);
         }
-        // 封装VO对象
+
+        //获取司机信息
+        DriverInfoVo driverInfoVo = null;
+        Long driverId = orderInfo.getDriverId();
+        if(driverId != null) {
+            driverInfoVo = driverInfoFeignClient.getDriverInfo(driverId).getData();
+        }
+
+        //获取账单信息
+        OrderBillVo orderBillVo = null;
+        if(orderInfo.getStatus() >= OrderStatus.UNPAID.getStatus()) {
+            orderBillVo = orderInfoFeignClient.getOrderBillInfo(orderId).getData();
+        }
+
         OrderInfoVo orderInfoVo = new OrderInfoVo();
         orderInfoVo.setOrderId(orderId);
         BeanUtils.copyProperties(orderInfo,orderInfoVo);
+        orderInfoVo.setOrderBillVo(orderBillVo);
+        orderInfoVo.setDriverInfoVo(driverInfoVo);
         return orderInfoVo;
     }
 

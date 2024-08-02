@@ -43,7 +43,7 @@ public interface OrderService {
     CurrentOrderInfoVo searchDriverCurrentOrder(Long driverId);
 
     /**
-     * 获取订单信息
+     * 获取订单账单详细信息
      */
     OrderInfoVo getOrderInfo(Long orderId, Long driverId);
 
@@ -74,7 +74,17 @@ public interface OrderService {
     Boolean endDrive(OrderFeeForm orderFeeForm);
 
     /**
+     * 结束代驾服务更新订单账单（多线程异步编排优化）
+     */
+    Boolean endDriveByThread(OrderFeeForm orderFeeForm);
+
+    /**
      * 获取司机订单分页列表
      */
     PageVo findDriverOrderPage(Long driverId, Long page, Long limit);
+
+    /**
+     * 司机发送账单信息
+     */
+    Boolean sendOrderBillInfo(Long orderId, Long driverId);
 }

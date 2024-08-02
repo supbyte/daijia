@@ -142,7 +142,7 @@ public class OrderController {
     public Result<Boolean> endDrive(@RequestBody OrderFeeForm orderFeeForm) {
         Long driverId = AuthContextHolder.getUserId();
         orderFeeForm.setDriverId(driverId);
-        return Result.ok(orderService.endDrive(orderFeeForm));
+        return Result.ok(orderService.endDriveByThread(orderFeeForm));
     }
 
     /**
@@ -162,7 +162,15 @@ public class OrderController {
         return Result.ok(pageVo);
     }
 
-
-
+    /**
+     * 司机发送账单信息
+     */
+    @Operation(summary = "司机发送账单信息")
+    @GuiguLogin
+    @GetMapping("/sendOrderBillInfo/{orderId}")
+    public Result<Boolean> sendOrderBillInfo(@PathVariable Long orderId) {
+        Long driverId = AuthContextHolder.getUserId();
+        return Result.ok(orderService.sendOrderBillInfo(orderId, driverId));
+    }
 }
 

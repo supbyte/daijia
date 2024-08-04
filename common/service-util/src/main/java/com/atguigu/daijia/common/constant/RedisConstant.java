@@ -45,4 +45,7 @@ public class RedisConstant {
     public static final long COUPON_LOCK_WAIT_TIME = 1;
     //加锁的时间
     public static final long COUPON_LOCK_LEASE_TIME = 1;
+    //获取锁的最大重试次数
+    public static final int COUPON_LOCK_MAX_RETRY_TIMES = 3;
+
 }

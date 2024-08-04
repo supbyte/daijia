@@ -38,6 +38,9 @@ public class UsedCouponVo {
     @Schema(description = "优惠券描述")
 	private String description;
 
-	@Schema(description = "领取时间")
+	@Schema(description = "用户优惠券ID")
+	private Long customerCouponId;
+
+	@Schema(description = "使用时间")
 	private Date usedTime;
 }

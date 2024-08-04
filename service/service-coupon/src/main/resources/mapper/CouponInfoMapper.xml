@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
-PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
-"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 
 <mapper namespace="com.atguigu.daijia.coupon.mapper.CouponInfoMapper">
@@ -25,7 +25,7 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 			info.publish_count,
 			info.per_limit,
 			info.expire_time,
-			info.describe
+			info.description
 		from coupon_info info
 		where
 		    info.status = 1
@@ -33,7 +33,7 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 			and (
 			    info.per_limit =0 or info.per_limit &lt; (select count(1) from customer_coupon where customer_id = #{customerId})
 			)
-		order by info.id desc
+		order by info.expire_time
     </select>
 
 	<select id="findNoUsePage" resultType="com.atguigu.daijia.model.vo.coupon.NoUseCouponVo">
@@ -47,7 +47,7 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 			info.publish_count,
 			info.per_limit,
 			info.expire_time,
-			info.describe,
+			info.description,
 
 			cstr.receive_time
 		from coupon_info info
@@ -56,7 +56,7 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 		cstr.customer_id = #{customerId}
 		and cstr.status = 1
 		and cstr.expire_time > now()
-		order by cstr.id desc
+		order by cstr.expire_time
 	</select>
 
 	<select id="findUsedPage" resultType="com.atguigu.daijia.model.vo.coupon.UsedCouponVo">
@@ -70,9 +70,8 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 			info.publish_count,
 			info.per_limit,
 			info.expire_time,
-			info.describe,
-
-			cstr.id as customerCouponId,
+			info.description,
+			cstr.id as customer_couponId,
 			cstr.used_time
 		from coupon_info info
 		inner join customer_coupon cstr on cstr.coupon_id = info.id
@@ -83,7 +82,7 @@ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<update id="updateReceiveCount">
-		update coupon_info set receive_count = receive_count + 1 where id = #{id}
+		update coupon_info set receive_count = receive_count + 1 where id = #{couponId} and receive_count &lt; coupon_info.publish_count
 	</update>
 
 	<update id="updateReceiveCountByLimit">

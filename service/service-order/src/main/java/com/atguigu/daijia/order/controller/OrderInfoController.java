@@ -17,6 +17,8 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 
 @Tag(name = "订单API接口管理")
 @RestController
@@ -217,6 +219,15 @@ public class OrderInfoController {
     @GetMapping("/getOrderRewardFee/{orderNo}")
     public Result<OrderRewardVo> getOrderRewardFee(@PathVariable String orderNo) {
         return Result.ok(orderInfoService.getOrderRewardFee(orderNo));
+    }
+
+    /**
+     * 更新订单优惠券金额
+     */
+    @Operation(summary = "更新订单优惠券金额")
+    @GetMapping("/updateCouponAmount/{orderId}/{couponAmount}")
+    public Result<Boolean> updateCouponAmount(@PathVariable Long orderId, @PathVariable BigDecimal couponAmount) {
+        return Result.ok(orderInfoService.updateCouponAmount(orderId, couponAmount));
     }
 }
 

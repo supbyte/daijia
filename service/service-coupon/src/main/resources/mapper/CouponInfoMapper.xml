@@ -100,7 +100,7 @@
 			info.publish_count,
 			info.per_limit,
 			info.expire_time,
-			info.describe,
+			info.description,
 
 			cstr.id as customerCouponId,
 			cstr.receive_time

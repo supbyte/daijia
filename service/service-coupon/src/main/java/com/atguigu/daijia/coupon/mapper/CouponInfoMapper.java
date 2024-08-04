@@ -11,6 +11,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 @Mapper
 public interface CouponInfoMapper extends BaseMapper<CouponInfo> {
 
@@ -21,4 +23,8 @@ public interface CouponInfoMapper extends BaseMapper<CouponInfo> {
     IPage<UsedCouponVo> findUsedPage(Page<CouponInfo> pageParam, @Param("customerId") Long customerId);
 
     int updateReceiveCount(@Param("couponId") Long couponId);
+
+    List<NoUseCouponVo> findNoUseList(@Param("customerId")Long customerId);
+
+    int updateUseCount(Long id);
 }

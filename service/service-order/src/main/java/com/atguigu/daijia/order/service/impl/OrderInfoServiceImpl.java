@@ -1,5 +1,6 @@
 package com.atguigu.daijia.order.service.impl;
 
+import com.atguigu.daijia.common.constant.MqConst;
 import com.atguigu.daijia.common.constant.RedisConstant;
 import com.atguigu.daijia.common.execption.GuiguException;
 import com.atguigu.daijia.common.result.ResultCodeEnum;
@@ -26,6 +27,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBlockingQueue;
+import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -71,14 +74,40 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderInfo.setStatus(OrderStatus.WAITING_ACCEPT.getStatus());
         // 插入订单数据
         orderInfoMapper.insert(orderInfo);
+
+        //生成订单之后，发送延迟消息
+        this.sendDelayMessage(orderInfo.getId());
+
         //向redis添加标识
         //接单标识，标识不存在了说明不在等待接单状态了
         // TODO 此处是否应该加上具体订单标识？
         redisTemplate.opsForValue().set(RedisConstant.ORDER_ACCEPT_MARK+orderInfo.getId(), "0", RedisConstant.ORDER_ACCEPT_MARK_EXPIRES_TIME, TimeUnit.MINUTES);
         // 记录订单日志
         log(orderInfo.getId(), orderInfo.getStatus());
+
         // 返回订单ID
         return orderInfo.getId();
+    }
+
+    /**
+     * 生成订单之后发送延迟消息
+     */
+    private void sendDelayMessage(Long orderId) {
+        try{
+            //1 创建一个阻塞队列
+            RBlockingQueue<Object> blockingQueue = redissonClient.getBlockingQueue(MqConst.CANCEL_ORDER_DELAY_QUEUE);
+
+            //2 把创建队列放到延迟队列里面
+            RDelayedQueue<Object> delayedQueue = redissonClient.getDelayedQueue(blockingQueue);
+
+            //3 发送消息到延迟队列里面
+            //设置过期时间 15分钟
+            delayedQueue.offer(orderId.toString(),15,TimeUnit.MINUTES);
+
+        }catch (Exception e) {
+            log.error("发送延迟消息失败",e);
+            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
+        }
     }
 
     @Override
@@ -456,5 +485,28 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         orderRewardVo.setDriverId(orderInfo.getDriverId());
         orderRewardVo.setRewardFee(orderBill.getRewardFee());
         return orderRewardVo;
+    }
+
+    @Override
+    public void orderCancel(long orderId) {
+        // 根据orderId查询订单状态
+        OrderInfo orderInfo = orderInfoMapper.selectById(orderId);
+
+        // 异常处理
+        if (orderInfo == null){
+            log.error("订单状态异常，未能查询到id为{}的订单信息",orderId);
+            throw new GuiguException(ResultCodeEnum.DATA_ERROR);
+        }
+
+        // 判断状态是否为等待接单
+        if (Objects.equals(orderInfo.getStatus(), OrderStatus.WAITING_ACCEPT.getStatus())){
+            // 修改状态为：未接单取消订单
+            orderInfo.setStatus(OrderStatus.CANCEL_ORDER.getStatus());
+            int rows = orderInfoMapper.updateById(orderInfo);
+            if (rows > 0){
+                // 订单取消成功后删除redis中的订单接单标识
+                redisTemplate.delete(RedisConstant.ORDER_ACCEPT_MARK+orderId);
+            }
+        }
     }
 }

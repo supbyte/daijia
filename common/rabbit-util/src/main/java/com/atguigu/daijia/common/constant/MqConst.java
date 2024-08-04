@@ -9,6 +9,8 @@ public class MqConst {
     public static final String QUEUE_PAY_SUCCESS = "daijia.pay.success";
     public static final String QUEUE_PROFITSHARING_SUCCESS = "daijia.profitsharing.success";
 
+    //取消订单队列名称
+    public static final String CANCEL_ORDER_DELAY_QUEUE = "queue_cancel";
 
     //取消订单延迟消息
     public static final String EXCHANGE_CANCEL_ORDER = "daijia.cancel.order";

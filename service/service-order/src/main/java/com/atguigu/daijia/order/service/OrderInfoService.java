@@ -101,4 +101,9 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * 获取订单的系统奖励
      */
     OrderRewardVo getOrderRewardFee(String orderNo);
+
+    /**
+     * 取消订单
+     */
+    void orderCancel(long orderId);
 }
